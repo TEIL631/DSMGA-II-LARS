@@ -20,26 +20,10 @@ bool GHC = true;
 bool SELECTION = true; // FIXME
 bool CACHE = false;
 bool SHOW_BISECTION = true;
-// bool BACKTRACK = true;
-// int GHC_type = 2; // 0:GHC, 1:partial GHC, 2: ordered partial GHC 
 double Partial_GHC_p = 0.3;
-// int Trimming = 0; // 0: disabled, 1: (i-min)/max, 2: sqrt(max-min/pop)*(i-min)/(max-min), 
-// bool FIX_CRITERIA = 0; // 0: cover rate, 1: success rate
-// int STALL_CRITERIA = 2; // 0: same nfe, 1: pop unchanged, 2: same nfe + non-increasing mi
-// bool STALL_DYN_THRES = 0; // 0: constant stall threshold, 1: decreasing (halved after every stall)
 int STALL_THRES = 50; // initial value for stall threshold
-// int STALL_THRES_MIN = 10; // minimum value for decreasing stall threshold
-// bool RM_REINIT = false; // only select reinit bit as startNode in RM
-// bool SC = false; // similarity check
 bool HARD_STOP = false; // forced termination if recent HARD_STOP_COEFF*maxnfe nfe do not yield better fitness
 double HARD_STOP_COEFF = 0.4; // % of maxnfe
-
-bool to_txt = false;
-FILE* pop_out;
-FILE* mi_out;
-FILE* reinit_out;
-FILE* time_out;
-clock_t start_time;
 
 
 char outputFilename[100];

@@ -199,10 +199,6 @@ double Chromosome::evaluate () {
     if (CACHE)
         cache[key]=accum;
 
-
-    if((nfe+lsnfe)%100 == 0)
-        fprintf(time_out, "%d\t%lf\n", nfe+lsnfe, (clock()-start_time)/(double)(CLOCKS_PER_SEC));
-
     return accum;
 
 }

@@ -22,24 +22,7 @@ using namespace std;
 
 
 DSMGA2::DSMGA2 (int n_ell, int n_nInitial, int n_maxGen, int n_maxFe, int fffff) {
-    if(to_txt){
-        pop_out = fopen("pop.txt","w");
-        mi_out = fopen("mi.txt","w");
-        reinit_out = fopen("reinit.txt","w");
-    }
 
-    int inst_num = 1;
-    char* inst_num_env = getenv("DSMGA2_INSTANCE_NUMBER");
-    if(inst_num_env)
-       inst_num = atoi(inst_num_env);
-
-
-    char time_path[50];
-    sprintf(time_path, "time/%d_%d/%d_%d.txt", fffff, n_ell, inst_num, n_nInitial);
-    time_out = fopen(time_path, "a");
-    fprintf(time_out, "0\t0\n");
-    start_time = clock();
-	
     previousFitnessMean = -INF;
     ell = n_ell;
     nCurrent = (n_nInitial/2)*2;  // has to be even
@@ -86,8 +69,6 @@ DSMGA2::DSMGA2 (int n_ell, int n_nInitial, int n_maxGen, int n_maxFe, int fffff)
             population[i].GHC();
     }
 
-    // printf("init\n");
-    // showPopulation();
 
     BMEQ = false;
 
@@ -123,23 +104,6 @@ DSMGA2::~DSMGA2 () {
 
     delete[] solution;
    
-    if(to_txt){
-    	fclose(pop_out);
-        fclose(mi_out);
-        fclose(reinit_out);
-    }
-}
-
-void DSMGA2::showPopulation (FILE* fp = stdout) {
-    for (int i=0; i<nCurrent; ++i) {
-	for(int j=0;j<ell;j++){
-	    fprintf(fp, "%d ",population[i].getVal(j));
-	}
-
-        double f = population[i].getFitness();
-	fprintf(fp, "%f\n", f);
-    }
-    fprintf(fp, "\n");
 }
 
 bool DSMGA2::isSteadyState () {
@@ -230,8 +194,6 @@ int DSMGA2::doIt (bool output) {
                 r_history.push_back(false);
             }
             else{
-                if(to_txt)
-                    fprintf(reinit_out, "[Gen%d] backtrack\n", generation);
                 reverse_count++;
                 if(!history.empty()){
 
@@ -253,14 +215,6 @@ int DSMGA2::doIt (bool output) {
 
             }
             cur_status.clear();
-
-    	    if(to_txt){
-    	        fprintf(reinit_out, "[Gen%d] fixed bits are\n", generation);
-        		for(int i=0;i<ell;i++){
-        		    fprintf(reinit_out, "%d ", solution[i]);
-        		}
-        		fprintf(reinit_out, "\n");
-    	    }
 
             bool *fixed = new bool[ell];
             for(int i = 0; i < ell; i++){
@@ -301,10 +255,6 @@ int DSMGA2::doIt (bool output) {
     	    stall_counter = 0;
     	}
 
-    	if(to_txt){
-    	    fprintf(reinit_out, "[Gen%d]\n", generation);
-    	    fprintf(reinit_out, "stall counter: %d\n", stall_counter);
-    	}
 
         mean_fit = stFitness.getMean();
     }
@@ -757,12 +707,6 @@ void DSMGA2::mixing() {
 
     //* really learn model
     buildFastCounting();
-    
-    if(to_txt){
-    	fprintf(pop_out,"[Gen%d]\n",generation);
-	showPopulation(pop_out);
-    }
-    
     buildGraph(SELECTION);
     buildGraph_sizecheck(SELECTION);
     //for (int i=0; i<ell; ++i)
@@ -807,7 +751,6 @@ void DSMGA2::buildGraph(bool selection) {
     increasing_mi = false;
 
     for (int i=0; i<ell; ++i) {
-	//printf("%d ", one[i]);
 
         for (int j=i+1; j<ell; ++j) {
 
@@ -846,29 +789,11 @@ void DSMGA2::buildGraph(bool selection) {
                 graph.write(i, j, p);
             }
             else{
-		if(!selection){
-		    pair<double,double> p_peak = peak_MI(i,j);
-		    if(!increasing_mi && (linkage00 - EPSILON > p_peak.first || linkage01 - EPSILON > p_peak.second)){
-		        if(to_txt){
-			    fprintf(mi_out, "[Gen%d]\n", generation);
-			    fprintf(mi_out, "%d %d (%f,%f)->(%f,%f)\n", i,j,p_peak.first,p_peak.second,linkage00,linkage01);
-		        }
-		        increasing_mi = true;
-		    }
-		
-		    p_peak.first = (linkage00 - EPSILON > p_peak.first)? linkage00 : p_peak.first;
-		    p_peak.second = (linkage01 - EPSILON > p_peak.second)? linkage01 : p_peak.second;
-		    peak_MI.write(i,j,p_peak);
-		}
-
-		else{
-                    pair<double, double> p(linkage00, linkage01);
-                    graph.write(i, j, p);
-		}
+		pair<double, double> p(linkage00, linkage01);
+                graph.write(i, j, p);
             } 
 	}
     }
-    //printf("\n");
 
 
     delete []one;
